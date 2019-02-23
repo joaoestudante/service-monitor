@@ -37,12 +37,12 @@ Finally, there is also a `ServiceManager` class, used to provide an interface fo
 * _**fetch**_
   - [x] Outputs results
   - [x] Saves to local storage
-  - [ ] Supports `--only`
-  - [ ] Supports `--exclude`
+  - [x] Supports `--only`
+  - [x] Supports `--exclude`
 
 * _**history**_
   - [x] Outputs data
-  - [ ] Supports `--only`
+  - [x] Supports `--only`
 
 * _**backup**_
   - [x] Saves the storage
@@ -58,3 +58,6 @@ Finally, there is also a `ServiceManager` class, used to provide an interface fo
 
 * _**help**_
   - [x] Outputs available commands
+
+* _**status**_
+  - Not implemented
