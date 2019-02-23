@@ -46,7 +46,7 @@ class PollCommand(Command):
             if service.identifier not in self.excluded:
                 output += service.poll() + "\n"
 
-        return output
+        return output[:-2]
 
 class ServicesCommand(Command):
 
@@ -80,10 +80,35 @@ class BackupCommand(Command):
         else:
             return self.save_as_binary()
 
+
+    def save_as_txt(self):
+        with open(self.output_filename(), "w") as out:
+            for service in self.services_manager.get_services():
+                for saved_poll in service.get_saved_polls():
+                    out.write(saved_poll + "\n")
+        return "Successfully wrote to " + self.output_filename() + " as a txt file."
+
+
+    def save_as_csv(self):
+        import csv
+        with open(self.output_filename(), "w", newline='') as out:
+            fieldnames = ["service_id", "date", "time", "status"]
+            writer = csv.writer(out, delimiter=",")
+            writer.writerow(fieldnames)
+            for service in self.services_manager.get_services():
+                for saved_poll in service.get_saved_polls():
+                    split = saved_poll.split()
+                    info = (split[1:4])
+                    status = ' '.join([c for c in split[4:]])
+                    info.append(status)
+                    writer.writerow(info)
+
+            return "Successfully wrote to " + self.output_filename() + " as csv."
+
     def save_as_binary(self):
         with open(self.output_filename(), "wb") as out:
             pickle.dump(self.services_manager, out)
-            return "Saved data to file " + self.output_filename()
+            return "Successfully wrote to " + self.output_filename() + " as binary file."
 
 class HistoryCommand(Command):
     def execute(self):

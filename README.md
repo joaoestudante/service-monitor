@@ -46,8 +46,8 @@ Finally, there is also a `ServiceManager` class, used to provide an interface fo
 
 * _**backup**_
   - [x] Saves the storage
-  - [ ] Save to `--format=txt` [BONUS]
-  - [ ] Save to `--format=csv` [BONUS]
+  - [x] Save to `--format=txt` [BONUS]
+  - [x] Save to `--format=csv` [BONUS]
 
 * _**restore**_
   - [ ] Sets storage contents to argument file content

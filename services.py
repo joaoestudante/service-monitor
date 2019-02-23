@@ -90,13 +90,15 @@ class Service(object):
 
 class BitBucketService(Service):
     def poll(self):
-        status_string = "- BitBucket: " + datetime.datetime.now().strftime("%Y-%m-%d, %H:%m:%S")
+        status_string = "- BitBucket " + datetime.datetime.now().strftime("%Y-%m-%d %H:%m:%S")
         content = self.get_content(self.link)
         if content:
             doc = BeautifulSoup(content, "html.parser")
 
             all_system_status = doc.find("span", class_="status font-large")
-            status_string += " [" + all_system_status.getText().strip() + "]" + "\n  "
+            #status_string += " [" + all_system_status.getText().strip() + "]" + "\n  "
+            status_string += " [" + all_system_status.getText().strip() + "]"
+
             """
             status_elements = doc.find_all("div", class_="component-container border-color")
             for div in status_elements:
@@ -115,13 +117,14 @@ class BitBucketService(Service):
 
 class GitLabService(Service):
     def poll(self):
-        status_string = "- Gitlab: " + datetime.datetime.now().strftime("%Y-%m-%d, %H:%m:%S")
+        status_string = "- Gitlab    " + datetime.datetime.now().strftime("%Y-%m-%d %H:%m:%S")
         content = self.get_content(self.link)
         if content:
             doc = BeautifulSoup(content, "html.parser")
 
             all_system_status = doc.find("div",class_="col-md-8 col-sm-6 col-xs-12")
-            status_string += " [" + all_system_status.getText().strip() + "]\n  "
+            #status_string += " [" + all_system_status.getText().strip() + "]\n  "
+            status_string += " [" + all_system_status.getText().strip() + "]"
 
             """
             # First div of the status column
