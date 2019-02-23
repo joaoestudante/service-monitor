@@ -37,21 +37,21 @@ Finally, there is also a `ServiceManager` class, used to provide an interface fo
 * _**fetch**_
   - [x] Outputs results
   - [x] Saves to local storage
-  - [] Supports `--only`
-  - [] Supports `--exclude`
+  - [ ] Supports `--only`
+  - [ ] Supports `--exclude`
 
 * _**history**_
   - [x] Outputs data
-  - [] Supports `--only`
+  - [ ] Supports `--only`
 
 * _**backup**_
   - [x] Saves the storage
-  - [] Save to `--format=txt`
-  - [] Save to `--format=csv`
+  - [ ] Save to `--format=txt`
+  - [ ] Save to `--format=csv`
 
 * _**restore**_
-  - [] Sets storage contents to argument file content
-  - [] Supports `--merge=True`
+  - [ ] Sets storage contents to argument file content
+  - [ ] Supports `--merge=True`
 
 * _**services**_
   - [x] Outputs services in config file
