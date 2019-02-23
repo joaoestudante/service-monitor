@@ -1,0 +1,2 @@
+bitbucket|BitBucket|https://status.bitbucket.org
+gitlab|GitLab|https://status.gitlab.com
