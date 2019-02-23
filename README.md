@@ -31,27 +31,27 @@ Finally, there is also a `ServiceManager` class, used to provide an interface fo
 * _**poll**_
   - [x] Outputs results
   - [x] Saves to local storage
-  - [x] Supports `--only`
-  - [x] Supports `--exclude`
+  - [x] Supports `--only` [BONUS]
+  - [x] Supports `--exclude` [BONUS]
 
 * _**fetch**_
   - [x] Outputs results
   - [x] Saves to local storage
-  - [x] Supports `--only`
-  - [x] Supports `--exclude`
+  - [x] Supports `--only` [BONUS]
+  - [x] Supports `--exclude` [BONUS]
 
 * _**history**_
   - [x] Outputs data
-  - [x] Supports `--only`
+  - [x] Supports `--only` [BONUS]
 
 * _**backup**_
   - [x] Saves the storage
-  - [ ] Save to `--format=txt`
-  - [ ] Save to `--format=csv`
+  - [ ] Save to `--format=txt` [BONUS]
+  - [ ] Save to `--format=csv` [BONUS]
 
 * _**restore**_
   - [ ] Sets storage contents to argument file content
-  - [ ] Supports `--merge=True`
+  - [ ] Supports `--merge=True` [BONUS]
 
 * _**services**_
   - [x] Outputs services in config file
@@ -59,5 +59,5 @@ Finally, there is also a `ServiceManager` class, used to provide an interface fo
 * _**help**_
   - [x] Outputs available commands
 
-* _**status**_
+* _**status**_ [BONUS]
   - Not implemented
