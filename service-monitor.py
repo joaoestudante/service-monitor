@@ -6,7 +6,7 @@ Usage:
     service-monitor fetch [--refresh=<time>] [--exclude=<service>...|--only=<service>...]
     service-monitor history [--only=<service>]
     service-monitor backup --filename=<filename> [--format=<filetype>]
-    service-monitor restore [--merge=<merge>]
+    service-monitor restore --filename=<filename> [--merge=<merge>]
     service-monitor services
     service-monitor help
     service-monitor status
@@ -68,8 +68,8 @@ if __name__ == "__main__":
         print(backup.execute())
 
     elif arguments["restore"]:
-        restore = cmd.RestoreCommand(used_args)
-        restore.execute()
+        restore = cmd.RestoreCommand(used_args, services_manager)
+        print(restore.execute())
 
     elif arguments["services"]:
         services = cmd.ServicesCommand(used_args, services_manager, "config.txt")

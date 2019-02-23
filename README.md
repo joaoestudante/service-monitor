@@ -50,8 +50,8 @@ Finally, there is also a `ServiceManager` class, used to provide an interface fo
   - [x] Save to `--format=csv` [BONUS]
 
 * _**restore**_
-  - [ ] Sets storage contents to argument file content
-  - [ ] Supports `--merge=True` [BONUS]
+  - [x] Sets storage contents to argument file content
+  - [x] Supports `--merge=True` [BONUS]
 
 * _**services**_
   - [x] Outputs services in config file

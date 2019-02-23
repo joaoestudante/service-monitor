@@ -17,16 +17,17 @@ class ServiceManager(object):
     def __init__(self, path):
         self.existing_services = []
         self.storage_location = path
+        self.stored_polls = []
 
     def create(self, service_str):
         if service_str[0] == "bitbucket":
             new_service = BitBucketService(identifier = service_str[0],
-                name = service_str[1], link = service_str[2])
+                name = service_str[1], link = service_str[2], manager=self)
             self.existing_services.append(new_service)
 
         elif service_str[0] == "gitlab":
             new_service = GitLabService(identifier = service_str[0],
-                name = service_str[1], link = service_str[2])
+                name = service_str[1], link = service_str[2], manager=self)
             self.existing_services.append(new_service)
 
     def existing_services_str(self):
@@ -39,12 +40,18 @@ class ServiceManager(object):
     def get_services(self):
         return self.existing_services
 
+    def get_saved_polls(self):
+        return self.stored_polls
+
     def update_services(self, config):
         for service in services_from_file(config):
             service_str_clean = service.replace("\n", "")
             service_splitted = service_str_clean.split("|")
             if service_splitted[0] not in self.existing_services_str():
                 self.create(service_splitted)
+
+    def add_to_saved_polls(self, line):
+        self.stored_polls.append(line)
 
     def save(self):
         with open(self.storage_location, "wb") as sl:
@@ -54,11 +61,11 @@ class ServiceManager(object):
 class Service(object):
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, identifier, name, link):
+    def __init__(self, identifier, name, link, manager):
         self.identifier = identifier
         self.name = name
         self.link = link
-        self.stored_polls = []
+        self.manager = manager
 
 
     def get_content(self, url):
@@ -81,7 +88,7 @@ class Service(object):
         self.stored_polls.append(poll_result)
 
     def get_saved_polls(self):
-        return self.stored_polls
+        return self.manager.get_saved_polls()
 
     @abc.abstractmethod
     def poll(self):
@@ -112,7 +119,7 @@ class BitBucketService(Service):
                 status_string += "* " + name_of_subservice + ": " + status + "\n  "
             """
 
-        self.save_poll(status_string)
+        self.manager.add_to_saved_polls(status_string)
         return status_string
 
 class GitLabService(Service):
@@ -146,5 +153,5 @@ class GitLabService(Service):
             status_string += "* " + last_name + ": " + last_status + "\n"
             """
 
-        self.save_poll(status_string)
+        self.manager.add_to_saved_polls(status_string)
         return status_string

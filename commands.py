@@ -4,6 +4,7 @@ Command classes for usage with service-monitor.py.
 
 import abc
 from time import sleep
+import pickle
 
 class Command(object):
     __metaclass__ = abc.ABCMeta
@@ -32,6 +33,9 @@ class Command(object):
             excluded = self.arguments.get("--exclude", [])
 
         return excluded
+
+    def get_merge(self):
+        return self.arguments.get("--merge", False)
 
     @abc.abstractmethod
     def execute(self):
@@ -113,12 +117,10 @@ class BackupCommand(Command):
 class HistoryCommand(Command):
     def execute(self):
         output = ""
-        for service in self.services_manager.get_services():
-            if service.identifier not in self.excluded:
-                for saved_poll in service.get_saved_polls():
-                    output += saved_poll + "\n"
+        for saved_poll in self.services_manager.get_saved_polls():
+            output += saved_poll + "\n"
 
-        return output
+        return output[:-1]
 
 class FetchCommand(Command):
     def execute(self):
@@ -129,6 +131,24 @@ class FetchCommand(Command):
 
             self.services_manager.save()
             sleep(int(self.get_refresh_time()))
+
+class RestoreCommand(Command):
+    def execute(self):
+        with open(self.output_filename(), "rb") as storage:
+            if self.get_merge():
+                temp_manager = pickle.load(storage)
+                polls_to_add = temp_manager.get_saved_polls()
+                self.services_manager.get_saved_polls().extend(polls_to_add)
+                self.services_manager.save()
+                return "Successfully merged contents of file " + self.output_filename() + " to storage"
+
+            else:
+                self.services_manager = pickle.load(storage)
+                self.services_manager.save()
+                return "Succesfully set storage to contents of file " + self.output_filename()
+
+
+
 
 
 
