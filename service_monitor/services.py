@@ -43,6 +43,9 @@ class ServiceManager(object):
     def get_saved_polls(self):
         return self.stored_polls
 
+    def add_polls(self, polls):
+        self.get_saved_polls().extend(polls)
+
     def update_services(self, config):
         for service in services_from_file(config):
             service_str_clean = service.replace("\n", "")
@@ -97,7 +100,7 @@ class Service(object):
 
 class BitBucketService(Service):
     def poll(self):
-        status_string = "- BitBucket " + datetime.datetime.now().strftime("%Y-%m-%d %H:%m:%S")
+        status_string = "- BitBucket " + str(datetime.datetime.now())[:-7]
         content = self.get_content(self.link)
         if content:
             doc = BeautifulSoup(content, "html.parser")
@@ -107,6 +110,11 @@ class BitBucketService(Service):
             status_string += " [" + all_system_status.getText().strip() + "]"
 
             """
+            Initially, polling returned all this info about sub-services,
+            which was not that useful for a csv style logging, with a 1-liner
+            with enough info. It is still kept here in case it is necessary in
+            the future for some cases (or new commands).
+
             status_elements = doc.find_all("div", class_="component-container border-color")
             for div in status_elements:
                 spans = div.findChildren("span")
@@ -124,16 +132,20 @@ class BitBucketService(Service):
 
 class GitLabService(Service):
     def poll(self):
-        status_string = "- Gitlab    " + datetime.datetime.now().strftime("%Y-%m-%d %H:%m:%S")
+        status_string = "- Gitlab    " + str(datetime.datetime.now())[:-7]
         content = self.get_content(self.link)
         if content:
             doc = BeautifulSoup(content, "html.parser")
 
             all_system_status = doc.find("div",class_="col-md-8 col-sm-6 col-xs-12")
-            #status_string += " [" + all_system_status.getText().strip() + "]\n  "
             status_string += " [" + all_system_status.getText().strip() + "]"
 
             """
+            Initially, polling returned all this info about sub-services,
+            which was not that useful for a csv style logging, with a 1-liner
+            with enough info. It is still kept here in case it is necessary in
+            the future for some cases (or new commands).
+
             # First div of the status column
             first_status_div = doc.find("div", class_="component component_first status_td")
             first_name = first_status_div.find("p", class_="component_name").getText().strip()

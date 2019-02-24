@@ -50,6 +50,10 @@ Service ID: gitlab
 Service Name: GitLab
 URL: https://status.gitlab.com
 
+$ ./service_monitor poll --exclude=gitlab --exclude=bitbucket
+
+$ ./service_monitor poll --only=gitlab
+- Gitlab    2019-02-24 14:15:42 [All Systems Operational]
 ```
 
 ### Design choices
