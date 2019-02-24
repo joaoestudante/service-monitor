@@ -29,8 +29,27 @@ urllib3==1.24.1
 git clone https://github.com/joaoestudante/service-monitor
 cd service-monitor
 source venv/bin/activate
-cd service-monitor
-./service-monitor <command>
+cd service_monitor
+./service_monitor.py <command>
+```
+
+### Examples
+```console
+$ ./service_monitor poll
+- BitBucket 2019-02-24 13:59:02 [All Systems Operational]
+- Gitlab    2019-02-24 13:59:03 [All Systems Operational]
+
+$ ./service_monitor services
+Configured services:
+
+Service ID: bitbucket
+Service Name: BitBucket
+URL: https://status.bitbucket.org
+
+Service ID: gitlab
+Service Name: GitLab
+URL: https://status.gitlab.com
+
 ```
 
 ### Design choices
