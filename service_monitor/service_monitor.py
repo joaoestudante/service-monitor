@@ -1,3 +1,4 @@
+#! /usr/bin/env python3
 """
 Service Monitor.
 
@@ -19,7 +20,6 @@ Options:
     --merge=<merge>       True or False. Merges the content of the input file instead of replacing it.
     --refresh=<time>      Ammount of time, in seconds, that should pass between continuous polling [default: 5].
 """
-
 from docopt import docopt
 import datetime
 import pickle
