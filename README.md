@@ -34,6 +34,13 @@ cd service_monitor
 ```
 
 ### Examples
+Example config file:
+```
+gitlab|GitLab|https://status.gitlab.com
+bitbucket|BitBucket|https://status.bitbucket.org
+```
+Usage:
+
 ```console
 $ ./service_monitor poll
 - BitBucket 2019-02-24 13:59:02 [All Systems Operational]
@@ -63,7 +70,14 @@ The `Command` class is inherited by each specific command. Every command must im
 
 The `Service` class is inherited by each type of service implemented. Similary to the `Command` class, each specific `Service` must implement some methods.
 
-Finally, there is also a `ServiceManager` class, used to provide an interface for creation, storage, and access of all implemented `Service`s.
+Finally, there is also a `ServiceManager` class, used to provide an interface for creation, storage, and access of all implemented `Service`s. Since this class stores both the services and their created logs, it's very trivial to save the storage and load it back with pickle, as there is only one object to dump/load.
+
+I also decided to create several custom exceptions, to ease the task of catching errors and printing better user messages for the user.
+
+#### What could be improved
+There could definitely be more test cases implemented. This is a new area for me, hence I've decided to write only some general tests, as opposed to many specific ones. School work also got a bit in the way, sadly.
+
+There could also be more error checking. It is likely that several errors and edge cases were overlooked, especially regarding the HTML documents reading and websites access.
 
 ### Implemented features
 * _**poll**_
@@ -98,4 +112,4 @@ Finally, there is also a `ServiceManager` class, used to provide an interface fo
   - [x] Outputs available commands
 
 * _**status**_ [BONUS]
-  - Not implemented
+  Not implemented
