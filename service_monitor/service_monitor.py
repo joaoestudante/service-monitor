@@ -28,6 +28,7 @@ import os
 
 import services as serv
 import commands as cmd
+import custom_exceptions
 
 
 def load_service_manager(path):
@@ -46,13 +47,16 @@ if __name__ == "__main__":
         arguments[option] != []}
 
     services_manager = load_service_manager("service-monitor.storage")
-    services_manager.update_services("config.txt")
+    try:
+        services_manager.update_services("config.txt")
+
+    except (custom_exceptions.BadConfigException, custom_exceptions.UnrecognizedServiceException) as e:
+        print(e)
+        os.sys.exit(0)
 
     if arguments["poll"]:
         poll = cmd.PollCommand(used_args, services_manager)
-        res = poll.execute()
-        print(res)
-        services_manager.save()
+        print(poll.execute())
 
     elif arguments["fetch"]:
         fetch = cmd.FetchCommand(used_args, services_manager)

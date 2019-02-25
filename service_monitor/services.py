@@ -6,6 +6,7 @@ import abc
 import datetime
 import requests
 from bs4 import BeautifulSoup
+import custom_exceptions
 
 def services_from_file(path):
     with open (path, "r") as services_config:
@@ -30,6 +31,11 @@ class ServiceManager(object):
                 name = service_str[1], link = service_str[2], manager=self)
             self.existing_services.append(new_service)
 
+        else:
+            raise custom_exceptions.UnrecognizedServiceException("[ERROR] "
+                    "Service with identifier \"" + service_str[0] + "\" unrecognized. "
+                    "Supported services are: " + str(["bitbucket", "gitlab"]))
+
     def existing_services_str(self):
         services = []
         for service in self.existing_services:
@@ -47,11 +53,34 @@ class ServiceManager(object):
         self.get_saved_polls().extend(polls)
 
     def update_services(self, config):
-        for service in services_from_file(config):
+        services = services_from_file(config)
+        config_services_names = []
+        line_n = 1
+
+        for service in services:
             service_str_clean = service.replace("\n", "")
             service_splitted = service_str_clean.split("|")
+
+            if len(service_splitted) != 3:
+                raise custom_exceptions.BadConfigException("[ERROR] Line " + str(line_n) + " of config file "
+                        "does not have required format: identifier|name|url")
+
+            config_services_names.append(service_splitted[0])
+
             if service_splitted[0] not in self.existing_services_str():
                 self.create(service_splitted)
+            elif service_splitted[0] in self.existing_services_str():
+                for service in self.existing_services:
+                    if service.identifier == service_splitted[0]:
+                        service.name = service_splitted[1]
+                        service.link = service_splitted[2]
+            line_n += 1
+
+        for service in self.existing_services:
+            if service.identifier not in config_services_names:
+                self.existing_services.remove(service)
+
+
 
     def add_to_saved_polls(self, line):
         self.stored_polls.append(line)
@@ -79,19 +108,30 @@ class Service(object):
            if "html" in content_type and response.status_code == 200:
                return response.content
 
-       except requests.exceptions.RequestException:
-           print("Error reading url: ", url)
-           return False
+       except requests.exceptions.ConnectionError:
+           raise custom_exceptions.ConnectionException("[ERROR] Couldn't connect to: " + url + ". Check if your internet "
+                   "connection is working.")
+
+       except requests.exceptions.Timeout:
+           raise custom_exceptions.TimoutException("[ERROR] Connection timed out when connecting to " + url)
+
+       except requests.exceptions.URLRequired:
+           raise custom_exceptions.InvalidUrlException("[ERROR] This url is not valid: " + url)
 
        except requests.exceptions.MissingSchema:
-           print("Missing schema (invalid url): ", url)
-           return False
+           raise custom_exceptions.InvalidUrlException("[ERROR] Missing schema (did your forget http or https?): ", url)
 
     def save_poll(self, poll_result):
         self.stored_polls.append(poll_result)
 
     def get_saved_polls(self):
         return self.manager.get_saved_polls()
+
+    def get_basic_status_line(self):
+        status_string = "- {} {}".format(
+                self.name,
+                str(datetime.datetime.now())[:-7])
+        return status_string
 
     @abc.abstractmethod
     def poll(self):
@@ -100,70 +140,32 @@ class Service(object):
 
 class BitBucketService(Service):
     def poll(self):
-        status_string = "- BitBucket " + str(datetime.datetime.now())[:-7]
-        content = self.get_content(self.link)
-        if content:
-            doc = BeautifulSoup(content, "html.parser")
+        try:
+            content = self.get_content(self.link)
+            status_string = self.get_basic_status_line()
 
+            doc = BeautifulSoup(content, "html.parser")
             all_system_status = doc.find("span", class_="status font-large")
-            #status_string += " [" + all_system_status.getText().strip() + "]" + "\n  "
             status_string += " [" + all_system_status.getText().strip() + "]"
 
-            """
-            Initially, polling returned all this info about sub-services,
-            which was not that useful for a csv style logging, with a 1-liner
-            with enough info. It is still kept here in case it is necessary in
-            the future for some cases (or new commands).
-
-            status_elements = doc.find_all("div", class_="component-container border-color")
-            for div in status_elements:
-                spans = div.findChildren("span")
-                for span in spans:
-                    if span.has_attr("class") and span["class"][0] == "name":
-                        name_of_subservice = span.getText().strip()
-                    if span.has_attr("class") and span["class"][0] == "component-status":
-                        status = span.getText().strip()
-
-                status_string += "* " + name_of_subservice + ": " + status + "\n  "
-            """
+        except custom_exceptions.CustomRequestsException as e:
+            status_string = str(e)
 
         self.manager.add_to_saved_polls(status_string)
         return status_string
 
 class GitLabService(Service):
     def poll(self):
-        status_string = "- Gitlab    " + str(datetime.datetime.now())[:-7]
-        content = self.get_content(self.link)
-        if content:
-            doc = BeautifulSoup(content, "html.parser")
+        try:
+            content = self.get_content(self.link)
+            status_string = self.get_basic_status_line()
 
+            doc = BeautifulSoup(content, "html.parser")
             all_system_status = doc.find("div",class_="col-md-8 col-sm-6 col-xs-12")
             status_string += " [" + all_system_status.getText().strip() + "]"
 
-            """
-            Initially, polling returned all this info about sub-services,
-            which was not that useful for a csv style logging, with a 1-liner
-            with enough info. It is still kept here in case it is necessary in
-            the future for some cases (or new commands).
-
-            # First div of the status column
-            first_status_div = doc.find("div", class_="component component_first status_td")
-            first_name = first_status_div.find("p", class_="component_name").getText().strip()
-            first_status = first_status_div.find("p", class_="pull-right component-status").getText().strip()
-            status_string += "* " + first_name + ": " + first_status + "\n  "
-
-            # Middle divs of the status column
-            for mid_div in doc.find_all("div", class_="component component_middle status_td"):
-                mid_name = mid_div.find("p", class_="component_name").getText().strip()
-                mid_status = mid_div.find("p", class_="pull-right component-status").getText().strip()
-                status_string += "* " + mid_name + ": " + mid_status + "\n  "
-
-            # Last div of the status column
-            last_div = doc.find("div", class_="component component_last status_td")
-            last_name = last_div.find("p", class_="component_name").getText().strip()
-            last_status = last_div.find("p", class_="pull-right component-status").getText().strip()
-            status_string += "* " + last_name + ": " + last_status + "\n"
-            """
+        except custom_exceptions.CustomRequestsException as e:
+            status_string = str(e)
 
         self.manager.add_to_saved_polls(status_string)
         return status_string

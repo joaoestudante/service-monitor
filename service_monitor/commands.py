@@ -98,6 +98,7 @@ class PollCommand(Command):
             if service.identifier not in self.excluded:
                 output += service.poll() + "\n"
 
+        self.services_manager.save()
         return output[:-1] # Remove extra \n
 
 class ServicesCommand(Command):
