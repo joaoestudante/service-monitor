@@ -38,19 +38,26 @@ def load_service_manager(path):
     else:
         return serv.ServiceManager(path)
 
-if __name__ == "__main__":
-    arguments=docopt(__doc__, version='Service Monitor 1.0')
 
-    used_args = {option:arguments[option] for option in arguments \
-        if arguments[option] is not None and \
-        not isinstance(arguments[option], bool) and \
-        arguments[option] != []}
+if __name__ == "__main__":
+    arguments = docopt(__doc__, version="Service Monitor 1.0")
+    used_args = {
+        option: arguments[option]
+        for option in arguments
+        if arguments[option] is not None
+        and not isinstance(arguments[option], bool)
+        and arguments[option] != []
+    }
 
     services_manager = load_service_manager("service-monitor.storage")
+
     try:
         services_manager.update_services("config.txt")
 
-    except (custom_exceptions.BadConfigException, custom_exceptions.UnrecognizedServiceException) as e:
+    except (
+        custom_exceptions.BadConfigException,
+        custom_exceptions.UnrecognizedServiceException,
+    ) as e:
         print(e)
         os.sys.exit(0)
 
@@ -85,4 +92,3 @@ if __name__ == "__main__":
     elif arguments["status"]:
         status = cmd.StatusCommand(used_args, services_manager)
         status.execute()
-

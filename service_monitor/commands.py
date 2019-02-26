@@ -6,11 +6,13 @@ import abc
 from time import sleep
 import pickle
 
+
 class Command(object):
     """ A Command class. Offers some common methods and variables for all
     commands. Any implementation of a command must implement the execute()
     method with the action that the command must perform.
     """
+
     __metaclass__ = abc.ABCMeta
 
     def __init__(self, arguments, services_manager):
@@ -86,6 +88,7 @@ class Command(object):
         print("Command not implemented.")
         return
 
+
 class PollCommand(Command):
     def execute(self):
         """ Polls implemented (and not excluded) services.
@@ -99,7 +102,8 @@ class PollCommand(Command):
                 output += service.poll() + "\n"
 
         self.services_manager.save()
-        return output[:-1] # Remove extra \n
+        return output[:-1]  # Remove extra \n
+
 
 class ServicesCommand(Command):
     def __init__(self, arguments, services_manager, config_file):
@@ -123,6 +127,7 @@ class ServicesCommand(Command):
                 output += "URL: " + elements[2]
 
         return output
+
 
 class BackupCommand(Command):
     def execute(self):
@@ -148,18 +153,19 @@ class BackupCommand(Command):
 
     def save_as_csv(self):
         import csv
-        with open(self.output_filename(), "w", newline='') as out:
+
+        with open(self.output_filename(), "w", newline="") as out:
             fieldnames = ["service_id", "date", "time", "status"]
             writer = csv.writer(out, delimiter=",")
             writer.writerow(fieldnames)
             for service in self.services_manager.get_services():
                 for saved_poll in service.get_saved_polls():
-                    split = saved_poll.split() # Split poll result at whitespace
-                    info = split[1:4] # First character is a "-", ignore
+                    split = saved_poll.split()  # Split poll result at whitespace
+                    info = split[1:4]  # First character is a "-", ignore
 
                     # Last part of string should be one value but the sentence
                     # can be several words: join them into one string
-                    status = ' '.join([c for c in split[4:]])
+                    status = " ".join([c for c in split[4:]])
                     info.append(status)
                     writer.writerow(info)
 
@@ -168,7 +174,10 @@ class BackupCommand(Command):
     def save_as_binary(self):
         with open(self.output_filename(), "wb") as out:
             pickle.dump(self.services_manager, out)
-            return "Successfully wrote to " + self.output_filename() + " as binary file."
+            return (
+                "Successfully wrote to " + self.output_filename() + " as binary file."
+            )
+
 
 class HistoryCommand(Command):
     def execute(self):
@@ -181,7 +190,8 @@ class HistoryCommand(Command):
         for saved_poll in self.services_manager.get_saved_polls():
             output += saved_poll + "\n"
 
-        return output[:-1] # Remove extra \n
+        return output[:-1]  # Remove extra \n
+
 
 class FetchCommand(Command):
     def execute(self):
@@ -196,6 +206,7 @@ class FetchCommand(Command):
             # After all services are polled, log that.
             self.services_manager.save()
             sleep(int(self.get_refresh_time()))
+
 
 class RestoreCommand(Command):
     def execute(self):
@@ -212,12 +223,17 @@ class RestoreCommand(Command):
                 polls_to_add = temp_manager.get_saved_polls()
                 self.services_manager.add_polls(polls_to_add)
                 self.services_manager.save()
-                return "Successfully merged contents of file " + \
-                    self.output_filename() + " to storage"
+                return (
+                    "Successfully merged contents of file "
+                    + self.output_filename()
+                    + " to storage"
+                )
 
             else:
                 # Simply replace the storage with the input.
                 self.services_manager = pickle.load(storage)
                 self.services_manager.save()
-                return "Succesfully set storage to contents of file " + \
-                    self.output_filename()
+                return (
+                    "Succesfully set storage to contents of file "
+                    + self.output_filename()
+                )

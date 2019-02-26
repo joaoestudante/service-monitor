@@ -1,5 +1,5 @@
 """
-Services classes, for usage with service-monitor.py
+Services classes, for usage with service_monitor.py
 """
 import pickle
 import abc
@@ -8,13 +8,16 @@ import requests
 from bs4 import BeautifulSoup
 import custom_exceptions
 
+
 def services_from_file(path):
-    with open (path, "r") as services_config:
+    with open(path, "r") as services_config:
         all_services = services_config.readlines()
         return all_services
 
+
 class ServiceManager(object):
     """Stores all the created services."""
+
     def __init__(self, path):
         self.existing_services = []
         self.storage_location = path
@@ -22,19 +25,29 @@ class ServiceManager(object):
 
     def create(self, service_str):
         if service_str[0] == "bitbucket":
-            new_service = BitBucketService(identifier = service_str[0],
-                name = service_str[1], link = service_str[2], manager=self)
+            new_service = BitBucketService(
+                identifier=service_str[0],
+                name=service_str[1],
+                link=service_str[2],
+                manager=self,
+            )
             self.existing_services.append(new_service)
 
         elif service_str[0] == "gitlab":
-            new_service = GitLabService(identifier = service_str[0],
-                name = service_str[1], link = service_str[2], manager=self)
+            new_service = GitLabService(
+                identifier=service_str[0],
+                name=service_str[1],
+                link=service_str[2],
+                manager=self,
+            )
             self.existing_services.append(new_service)
 
         else:
-            raise custom_exceptions.UnrecognizedServiceException("[ERROR] "
-                    "Service with identifier \"" + service_str[0] + "\" unrecognized. "
-                    "Supported services are: " + str(["bitbucket", "gitlab"]))
+            raise custom_exceptions.UnrecognizedServiceException(
+                "[ERROR] "
+                'Service with identifier "' + service_str[0] + '" unrecognized. '
+                "Supported services are: " + str(["bitbucket", "gitlab"])
+            )
 
     def existing_services_str(self):
         services = []
@@ -62,8 +75,10 @@ class ServiceManager(object):
             service_splitted = service_str_clean.split("|")
 
             if len(service_splitted) != 3:
-                raise custom_exceptions.BadConfigException("[ERROR] Line " + str(line_n) + " of config file "
-                        "does not have required format: identifier|name|url")
+                raise custom_exceptions.BadConfigException(
+                    "[ERROR] Line " + str(line_n) + " of config file "
+                    "does not have required format: identifier|name|url"
+                )
 
             config_services_names.append(service_splitted[0])
 
@@ -79,8 +94,6 @@ class ServiceManager(object):
         for service in self.existing_services:
             if service.identifier not in config_services_names:
                 self.existing_services.remove(service)
-
-
 
     def add_to_saved_polls(self, line):
         self.stored_polls.append(line)
@@ -99,27 +112,34 @@ class Service(object):
         self.link = link
         self.manager = manager
 
-
     def get_content(self, url):
-       """Attempts to get the content at `url`."""
-       try:
-           response = requests.get(url)
-           content_type = response.headers["content-type"].lower()
-           if "html" in content_type and response.status_code == 200:
-               return response.content
+        """Attempts to get the content at `url`."""
+        try:
+            response = requests.get(url)
+            content_type = response.headers["content-type"].lower()
+            if "html" in content_type and response.status_code == 200:
+                return response.content
 
-       except requests.exceptions.ConnectionError:
-           raise custom_exceptions.ConnectionException("[ERROR] Couldn't connect to: " + url + ". Check if your internet "
-                   "connection is working.")
+        except requests.exceptions.ConnectionError:
+            raise custom_exceptions.ConnectionException(
+                "[ERROR] Couldn't connect to: " + url + ". Check if your internet "
+                "connection is working."
+            )
 
-       except requests.exceptions.Timeout:
-           raise custom_exceptions.TimoutException("[ERROR] Connection timed out when connecting to " + url)
+        except requests.exceptions.Timeout:
+            raise custom_exceptions.TimoutException(
+                "[ERROR] Connection timed out when connecting to " + url
+            )
 
-       except requests.exceptions.URLRequired:
-           raise custom_exceptions.InvalidUrlException("[ERROR] This url is not valid: " + url)
+        except requests.exceptions.URLRequired:
+            raise custom_exceptions.InvalidUrlException(
+                "[ERROR] This url is not valid: " + url
+            )
 
-       except requests.exceptions.MissingSchema:
-           raise custom_exceptions.InvalidUrlException("[ERROR] Missing schema (did your forget http or https?): ", url)
+        except requests.exceptions.MissingSchema:
+            raise custom_exceptions.InvalidUrlException(
+                "[ERROR] Missing schema (did your forget http or https?): ", url
+            )
 
     def save_poll(self, poll_result):
         self.stored_polls.append(poll_result)
@@ -128,15 +148,14 @@ class Service(object):
         return self.manager.get_saved_polls()
 
     def get_basic_status_line(self):
-        status_string = "- {} {}".format(
-                self.name,
-                str(datetime.datetime.now())[:-7])
+        status_string = "- {} {}".format(self.name, str(datetime.datetime.now())[:-7])
         return status_string
 
     @abc.abstractmethod
     def poll(self):
         """Polls the service page."""
         return
+
 
 class BitBucketService(Service):
     def poll(self):
@@ -154,6 +173,7 @@ class BitBucketService(Service):
         self.manager.add_to_saved_polls(status_string)
         return status_string
 
+
 class GitLabService(Service):
     def poll(self):
         try:
@@ -161,7 +181,7 @@ class GitLabService(Service):
             status_string = self.get_basic_status_line()
 
             doc = BeautifulSoup(content, "html.parser")
-            all_system_status = doc.find("div",class_="col-md-8 col-sm-6 col-xs-12")
+            all_system_status = doc.find("div", class_="col-md-8 col-sm-6 col-xs-12")
             status_string += " [" + all_system_status.getText().strip() + "]"
 
         except custom_exceptions.CustomRequestsException as e:
