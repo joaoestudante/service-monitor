@@ -46,10 +46,11 @@ class ServiceManager(object):
             raise custom_exceptions.UnrecognizedServiceException(
                 "[ERROR] "
                 'Service with identifier "' + service_str[0] + '" unrecognized. '
-                "Supported services are: " + str(["bitbucket", "gitlab"])
+                "Supported services are: " + self.existing_services_lst)
             )
 
-    def existing_services_str(self):
+    def existing_services_lst(self):
+        """Returns existing services as list."""
         services = []
         for service in self.existing_services:
             services.append(service.identifier)
@@ -66,6 +67,10 @@ class ServiceManager(object):
         self.get_saved_polls().extend(polls)
 
     def update_services(self, config):
+        """Given a config file, updates the services stored. Will delete any
+        service no longer in the config file, and update any
+        information (like name, link, etc)
+        """
         services = services_from_file(config)
         config_services_names = []
         line_n = 1
@@ -74,7 +79,7 @@ class ServiceManager(object):
             service_str_clean = service.replace("\n", "")
             service_splitted = service_str_clean.split("|")
 
-            if len(service_splitted) != 3:
+            if len(service_splitted) != 3: # Config line should only have 3 elements
                 raise custom_exceptions.BadConfigException(
                     "[ERROR] Line " + str(line_n) + " of config file "
                     "does not have required format: identifier|name|url"
@@ -82,9 +87,9 @@ class ServiceManager(object):
 
             config_services_names.append(service_splitted[0])
 
-            if service_splitted[0] not in self.existing_services_str():
+            if service_splitted[0] not in self.existing_services_lst():
                 self.create(service_splitted)
-            elif service_splitted[0] in self.existing_services_str():
+            elif service_splitted[0] in self.existing_services_lst():
                 for service in self.existing_services:
                     if service.identifier == service_splitted[0]:
                         service.name = service_splitted[1]
@@ -142,12 +147,15 @@ class Service(object):
             )
 
     def save_poll(self, poll_result):
+        """ Saves the poll_result in the manager."""
         self.stored_polls.append(poll_result)
 
     def get_saved_polls(self):
+        """Gets all the saved polls in the manager."""
         return self.manager.get_saved_polls()
 
     def get_basic_status_line(self):
+        """Builds a common status line for every service."""
         status_string = "- {} {}".format(self.name, str(datetime.datetime.now())[:-7])
         return status_string
 

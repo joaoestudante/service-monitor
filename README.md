@@ -33,7 +33,7 @@ cd service_monitor
 ./service_monitor.py <command>
 ```
 
-### Examples
+### Examples and Usage
 Example config file:
 ```
 gitlab|GitLab|https://status.gitlab.com
@@ -75,7 +75,7 @@ Finally, there is also a `ServiceManager` class, used to provide an interface fo
 I also decided to create several custom exceptions, to ease the task of catching errors and printing better user messages for the user.
 
 #### What could be improved
-There could definitely be more test cases implemented. This is a new area for me, hence I've decided to write only some general tests, as opposed to many specific ones. School work also got a bit in the way, sadly.
+There could definitely be more test cases implemented. This is a new area for me, hence I've decided to write only some general tests, in no way covering most of the code. School work also got a bit in the way, sadly.
 
 There could also be more error checking. It is likely that several errors and edge cases were overlooked, especially regarding the HTML documents reading and websites access.
 
