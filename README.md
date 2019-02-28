@@ -11,7 +11,7 @@ João Pedro Lourenço \<estudante.lourenco@gmail.com\>
 Instituto Superior Técnico, Engenharia Informática e de Computadores, 2nd year.
 
 ## Info about the tool
-`status-monitor` was developed in Python, using the following libraries:
+`status-monitor` was developed in Python 3.7.2, on Linux (Manjaro 4.14), using the following libraries:
 
 ```
 beautifulsoup4==4.7.1 # Webscraping
@@ -23,6 +23,8 @@ requests==2.21.0      # Get web content
 soupsieve==1.8
 urllib3==1.24.1
 ```
+
+A virtual environment is also included in this repository, so that the project can be used without conflicting packages and/or versions.
 
 ### How to install and run
 ```
